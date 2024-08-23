@@ -1,4 +1,11 @@
+#!/usr/bin/python3
+
+""" Minimum Operations """
+
+
 def minOperations(n):
+    """ Returns the minimum number of operations
+     needed to reach n from 1 """
     if n <= 1:
         return 0
 
@@ -12,7 +19,3 @@ def minOperations(n):
         factor += 1
 
     return operations
-
-
-# Example usage:
-print(minOperations(9))  # Output: 6
