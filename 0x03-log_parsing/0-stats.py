@@ -1,65 +1,50 @@
 #!/usr/bin/python3
+"""
+Log parsing and metrics for status codes.
+"""
 
 import sys
-import signal
 
-# Initialize metrics
-total_size = 0
-status_codes = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
-line_count = 0
+if __name__ == '__main__':
+    # Initialize metrics
+    filesize, count = 0, 0
+    codes = ["200", "301", "400", "401", "403", "404", "405", "500"]
+    stats = {k: 0 for k in codes}
 
+    def print_stats(stats: dict, file_size: int) -> None:
+        """Print the current statistics."""
+        print("File size: {:d}".format(filesize))
+        for k, v in sorted(stats.items()):
+            if v:
+                print("{}: {}".format(k, v))
 
-def print_stats():
-    """Print the current statistics."""
-    print(f"File size: {total_size}")
-    for code in sorted(status_codes.keys()):
-        if status_codes[code] > 0:
-            print(f"{code}: {status_codes[code]}")
-
-
-def signal_handler(sig, frame):
-    """Handle the SIGINT signal."""
-    print_stats()
-    sys.exit(0)
-
-
-# Register signal handler for SIGINT
-signal.signal(signal.SIGINT, signal_handler)
-
-
-def process_line(line):
-    """Process a single line of input."""
-    global total_size, line_count
-    parts = line.split()
-    if len(parts) < 7:
-        return
     try:
-        ip = parts[0]
-        date = parts[3] + " " + parts[4]
-        request = parts[5] + " " + parts[6] + " " + parts[7]
-        status_code = parts[-2]
-        file_size = parts[-1]
+        for line in sys.stdin:
+            count += 1
+            data = line.split()
 
-        if request != '"GET /projects/260 HTTP/1.1"':
-            return
+            # Update status code count
+            try:
+                status_code = data[-2]
+                if status_code in stats:
+                    stats[status_code] += 1
+            except BaseException:
+                pass
 
-        status_code = int(status_code)
-        file_size = int(file_size)
+            # Update file size
+            try:
+                filesize += int(data[-1])
+            except BaseException:
+                pass
 
-        total_size += file_size
-        if status_code in status_codes:
-            status_codes[status_code] += 1
+            # Print stats every 10 lines
+            if count % 10 == 0:
+                print_stats(stats, filesize)
 
-        line_count += 1
-        if line_count % 10 == 0:
-            print_stats()
-    except ValueError:
-        return
+        # Print final stats
+        print_stats(stats, filesize)
 
-
-# Read lines from stdin
-for line in sys.stdin:
-    process_line(line.strip())
-
-# Print final stats if the script ends without interruption
-print_stats()
+    except KeyboardInterrupt:
+        # Print stats on keyboard interruption
+        print_stats(stats, filesize)
+        raise
