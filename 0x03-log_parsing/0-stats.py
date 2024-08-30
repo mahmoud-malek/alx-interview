@@ -1,65 +1,57 @@
 #!/usr/bin/python3
 
-"""  script that reads stdin line
- by line and computes metrics
- """
-
 import sys
-import singal
+import signal
+
+# Initialize metrics
+total_size = 0
+status_codes = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
+line_count = 0
 
 
-def is_valid_line(line: str) -> bool:
-    """ a function that returns True if the line is valid """
+def print_stats():
+    """Print the current statistics."""
+    print(f"File size: {total_size}")
+    for code in sorted(status_codes.keys()):
+        if status_codes[code] > 0:
+            print(f"{code}: {status_codes[code]}")
+
+
+def signal_handler(sig, frame):
+    """Handle the SIGINT signal."""
+    print_stats()
+    sys.exit(0)
+
+
+# Register signal handler for SIGINT
+signal.signal(signal.SIGINT, signal_handler)
+
+
+def process_line(line):
+    """Process a single line of input."""
+    global total_size, line_count
+    parts = line.split()
+    if len(parts) != 9:
+        return
     try:
-        parts = line.split(" ")
-        status_code = parts[-2]
-        size = parts[-1]
-        if len(parts) < 2:
-            return False
-        if not status_code.isnumeric():
-            return False
-        if len(parts) < 3 or not size.isnumeric():
-            return False
-        return True
-    except Exception:
-        return False
+        ip, _, _, date, _, request, _, status_code, file_size = parts
+        if request != '"GET /projects/260 HTTP/1.1"':
+            return
+        status_code = int(status_code)
+        file_size = int(file_size)
+        total_size += file_size
+        if status_code in status_codes:
+            status_codes[status_code] += 1
+        line_count += 1
+        if line_count % 10 == 0:
+            print_stats()
+    except ValueError:
+        return
 
 
-def main():
-    """ the main function of the script """
-    status_codes = {
-        "200": 0,
-        "301": 0,
-        "400": 0,
-        "401": 0,
-        "403": 0,
-        "404": 0,
-        "405": 0,
-        "500": 0
-    }
-    file_size = 0
-    counter = 0
+# Read lines from stdin
+for line in sys.stdin:
+    process_line(line.strip())
 
-    try:
-        for line in sys.stdin:
-            counter += 1
-            if not is_valid_line(line):
-                continue
-            parts = line.split(" ")
-            status_code = parts[-2]
-            size = parts[-1]
-            if status_code in status_codes:
-                status_codes[status_code] += 1
-            file_size += int(size)
-            if counter % 10 == 0:
-                print(f"File size: {file_size}")
-                for k, v in sorted(status_codes.items()):
-                    if v != 0:
-                        print(f"{k}: {v}")
-    except KeyboardInterrupt:
-        pass
-    finally:
-        print(f"File size: {file_size}")
-        for k, v in sorted(status_codes.items()):
-            if v != 0:
-                print(f"{k}: {v}")
+# Print final stats if the script ends without interruption
+print_stats()
