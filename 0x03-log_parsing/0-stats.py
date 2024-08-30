@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 
 """  script that reads stdin line
  by line and computes metrics
@@ -28,8 +28,14 @@ def is_valid_line(line: str) -> bool:
 def main():
     """ the main function of the script """
     status_codes = {
-        "200": 0, "301": 0, "400": 0, "401": 0,
-        "403": 0, "404": 0, "405": 0, "500": 0
+        "200": 0,
+        "301": 0,
+        "400": 0,
+        "401": 0,
+        "403": 0,
+        "404": 0,
+        "405": 0,
+        "500": 0
     }
     file_size = 0
     counter = 0
