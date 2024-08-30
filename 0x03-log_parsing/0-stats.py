@@ -31,17 +31,25 @@ def process_line(line):
     """Process a single line of input."""
     global total_size, line_count
     parts = line.split()
-    if len(parts) != 9:
+    if len(parts) < 7:
         return
     try:
-        ip, _, _, date, _, request, _, status_code, file_size = parts
+        ip = parts[0]
+        date = parts[3] + " " + parts[4]
+        request = parts[5] + " " + parts[6] + " " + parts[7]
+        status_code = parts[-2]
+        file_size = parts[-1]
+
         if request != '"GET /projects/260 HTTP/1.1"':
             return
+
         status_code = int(status_code)
         file_size = int(file_size)
+
         total_size += file_size
         if status_code in status_codes:
             status_codes[status_code] += 1
+
         line_count += 1
         if line_count % 10 == 0:
             print_stats()
