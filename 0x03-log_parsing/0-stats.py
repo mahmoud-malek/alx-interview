@@ -43,8 +43,8 @@ codes = {
 
 try:
     for line in sys.stdin:
+        counter += 1
         if valid_line(line):
-            counter += 1
             line = line.strip().split(' ')
             file_size += int(line[8])
             codes[line[7]] += 1
@@ -55,3 +55,6 @@ try:
 except KeyboardInterrupt:
     print_stats(file_size, codes)
     sys.exit(1)
+
+# Print final stats if the loop ends naturally
+print_stats(file_size, codes)
