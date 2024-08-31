@@ -1,12 +1,12 @@
 #!/usr/bin/python3
 
-""" This is a function to read stdin line by line """
+""" This script reads stdin line by line and computes metrics """
 
 import sys
 
 
 def valid_line(line: str) -> bool:
-    """ this is a function to validate the line """
+    """ This function validates the line format """
     line = line.strip().split(' ')
     if len(line) != 9:
         return False
@@ -18,6 +18,14 @@ def valid_line(line: str) -> bool:
         return False
 
     return True
+
+
+def print_stats(file_size, codes):
+    """ This function prints the statistics """
+    print(f'File size: {file_size}')
+    for key in sorted(codes.keys()):
+        if codes[key] > 0:
+            print(f'{key}: {codes[key]}')
 
 
 counter = 0
@@ -42,14 +50,11 @@ try:
             codes[line[7]] += 1
 
         if counter == 10:
-            print(f'File size: {file_size}')
-            for key, val in codes.items():
-                if val > 0:
-                    print(f'{key}: {val}')
-            counter, file_size = 0, 0
+            print_stats(file_size, codes)
+            counter = 0
 except KeyboardInterrupt:
-    print(f'File size: {file_size}')
-    for key, val in codes.items():
-        if val > 0:
-            print(f'{key}: {val}')
+    print_stats(file_size, codes)
     sys.exit(1)
+
+# Print final stats if the loop ends naturally
+print_stats(file_size, codes)
