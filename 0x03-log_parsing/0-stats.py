@@ -55,6 +55,3 @@ try:
 except KeyboardInterrupt:
     print_stats(file_size, codes)
     sys.exit(1)
-
-# Print final stats if the loop ends naturally
-print_stats(file_size, codes)
