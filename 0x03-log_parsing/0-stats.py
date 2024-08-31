@@ -3,6 +3,7 @@
 """ This script reads stdin line by line and computes metrics """
 
 import sys
+import ipaddress
 
 
 def valid_line(line: str) -> bool:
@@ -12,6 +13,11 @@ def valid_line(line: str) -> bool:
         return False
 
     codes = [200, 301, 400, 401, 403, 404, 405, 500]
+    try:
+        ipaddress.ip_address(line[0])
+    except ValueError:
+        return False
+
     if not line[8].isdigit():
         return False
     if not line[7].isdigit() or int(line[7]) not in codes:
@@ -43,8 +49,8 @@ codes = {
 
 try:
     for line in sys.stdin:
-        counter += 1
         if valid_line(line):
+            counter += 1
             line = line.strip().split(' ')
             file_size += int(line[8])
             codes[line[7]] += 1
