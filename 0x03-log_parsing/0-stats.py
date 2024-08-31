@@ -1,50 +1,56 @@
-#!/usr/bin/python3
-"""
-Log parsing and metrics for status codes.
-"""
+#!/usr/bin/env python3
+
+""" this is a function to read stdin line by line """
 
 import sys
 
-if __name__ == '__main__':
-    # Initialize metrics
-    filesize, count = 0, 0
-    codes = ["200", "301", "400", "401", "403", "404", "405", "500"]
-    stats = {k: 0 for k in codes}
 
-    def print_stats(stats: dict, file_size: int) -> None:
-        """Print the current statistics."""
-        print("File size: {:d}".format(filesize))
-        for k, v in sorted(stats.items()):
-            if v:
-                print("{}: {}".format(k, v))
+def valid_line(line: str) -> bool:
+    line = line.strip().split(' ')
+    if (len(line) != 9):
+        return False
 
+    codes = [200, 301, 400, 401, 403, 404, 405, 500]
+    if not line[8].isdigit():
+        return False
+    if not line[7].isdigit() or int(line[7]) not in codes:
+        return False
+
+    return True
+
+
+counter = 0
+file_size = 0
+codes = {
+    '200': 0,
+    '301': 0,
+    '400': 0,
+    '401': 0,
+    '403': 0,
+    '404': 0,
+    '405': 0,
+    '500': 0}
+
+while True:
     try:
         for line in sys.stdin:
-            count += 1
-            data = line.split()
+            if valid_line(line):
+                counter += 1
+                line = line.strip().split(' ')
+                file_size += int(line[8])
+                codes[line[7]] += 1
 
-            # Update status code count
-            try:
-                status_code = data[-2]
-                if status_code in stats:
-                    stats[status_code] += 1
-            except BaseException:
-                pass
-
-            # Update file size
-            try:
-                filesize += int(data[-1])
-            except BaseException:
-                pass
-
-            # Print stats every 10 lines
-            if count % 10 == 0:
-                print_stats(stats, filesize)
-
-        # Print final stats
-        print_stats(stats, filesize)
-
+            if counter == 10:
+                print(f'File size: {file_size}')
+                for key, val in codes.items():
+                    if val > 0:
+                        print(f'{key}: {val}')
+                        codes[key] = 0
+                counter, file_size = 0, 0
+        break
     except KeyboardInterrupt:
-        # Print stats on keyboard interruption
-        print_stats(stats, filesize)
-        raise
+        print(f'File size: {file_size}')
+        for key, val in codes.items():
+            if val > 0:
+                print(f'{key}: {val}')
+        sys.exit(1)
