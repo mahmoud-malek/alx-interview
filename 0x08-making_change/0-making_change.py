@@ -6,32 +6,15 @@
 def makeChange(coins, total):
     """ Given a pile of coins of different values,
     determine the fewest number of coins needed
-             to meet a given amount total """
+                     to meet a given amount total """
     if total <= 0:
         return 0
-    idx = 0
-    seen = {}
-    min_path = float('inf')
 
-    def db(total):
-        # base case
-        if total == 0:
-            return 0
-        if total in seen:
-            return seen[total]
-        if total < 0:
-            return float('inf')
-
-        # recursive case
-        min_coins = float('inf')
+    db = [float('inf')] * (total + 1)
+    db[0] = 0
+    for t in range(1, total + 1):
         for c in coins:
-            if c <= total:
-                num_coins = db(total - c)
-                min_coins = min(min_coins, num_coins + 1)
-        seen[total] = min_coins
-        return min_coins
+            if t >= c:
+                db[t] = min(db[t], db[t - c] + 1)
 
-    min_path = db(total)
-    if min_path == float('inf'):
-        return -1
-    return min_path
+    return db[total] if db[total] != float('inf') else -1
