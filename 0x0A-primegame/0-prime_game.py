@@ -3,42 +3,47 @@
 """ Prime Game, determine the winner of the game """
 
 
-def sieve(n):
-    """ generate list of all primes up to n """
-    primes = [True] * (n + 1)
-    primes[0] = primes[1] = False
-
-    for i in range(2, int(n**0.5) + 1):
-        if primes[i]:
-            # mark all multiples of (i) prime
+def sieve_of_eratosthenes(n):
+    """ Returns a list where index i is True if i is prime, False otherwise """
+    sieve = [True] * (n + 1)
+    sieve[0] = sieve[1] = False  # 0 and 1 are not prime
+    for i in range(2, int(n ** 0.5) + 1):
+        if sieve[i]:
             for j in range(i * i, n + 1, i):
-                primes[j] = False
-    return primes
+                sieve[j] = False
+    return sieve
 
 
-def countPrimes(primes, n):
-    """ counts the primes """
-    return sum(primes[:n + 1])
+def prime_count_up_to_n(sieve, n):
+    """ Returns the number of primes up to n using the sieve """
+    return sum(sieve[:n + 1])
 
 
 def isWinner(x, nums):
-    """ a function to determine the winner of the game """
+    """ Determines the winner of the game after x rounds """
+    # Determine the maximum number in nums to optimize sieve size
+    max_n = max(nums)
 
-    bob = 0
-    maria = 0
-    maxN = max(nums)
+    # Create a sieve of primes up to max_n
+    sieve = sieve_of_eratosthenes(max_n)
 
-    primes = sieve(maxN)
+    # Track the number of wins for each player
+    maria_wins = 0
+    bob_wins = 0
+
     for n in nums:
-        primes_n = countPrimes(primes, n)
-        if primes_n % 2 == 1:
-            maria += 1
-        else:
-            bob += 1
+        primes_up_to_n = prime_count_up_to_n(sieve, n)
 
-    if maria > bob:
+        # If the number of primes is odd, Maria wins (since she goes first)
+        if primes_up_to_n % 2 == 1:
+            maria_wins += 1
+        else:
+            bob_wins += 1
+
+    # Determine the overall winner
+    if maria_wins > bob_wins:
         return "Maria"
-    elif bob > maria:
+    elif bob_wins > maria_wins:
         return "Bob"
     else:
         return None
