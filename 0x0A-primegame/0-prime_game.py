@@ -3,23 +3,22 @@
 """ Prime Game, determine the winner of the game """
 
 
-def is_prime(n):
-    """ check if a number is prime """
-    if n < 2:
-        return False
+def sieve(n):
+    """ generate list of all primes up to n """
+    primes = [True] * (n + 1)
+    primes[0] = primes[1] = False
+
     for i in range(2, int(n**0.5) + 1):
-        if n % i == 0:
-            return False
-    return True
+        if primes[i]:
+            # mark all multiples of (i) prime
+            for j in range(i * i, n + 1, i):
+                primes[j] = False
+    return primes
 
 
-def count_primes(n):
-    """ count the number of prime numbers in a given range """
-    count = 0
-    for i in range(2, n + 1):
-        if is_prime(i):
-            count += 1
-    return count
+def countPrimes(primes, n):
+    """ counts the primes """
+    return sum(primes[:n + 1])
 
 
 def isWinner(x, nums):
@@ -27,16 +26,19 @@ def isWinner(x, nums):
 
     bob = 0
     maria = 0
+    maxN = max(nums)
 
+    primes = sieve(maxN)
     for n in nums:
-        prime_count = count_primes(n)
-        if prime_count % 2 == 0:
-            bob += 1
-        else:
+        primes_n = countPrimes(primes, n)
+        if primes_n % 2 == 1:
             maria += 1
+        else:
+            bob += 1
 
-    if bob > maria:
-        return "Bob"
-    if bob < maria:
+    if maria > bob:
         return "Maria"
-    return None
+    elif bob > maria:
+        return "Bob"
+    else:
+        return None
