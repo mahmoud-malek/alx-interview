@@ -1,6 +1,6 @@
-#!/user/bin/python3
+#!/usr/bin/python3
 
-""" Prime Game """
+""" Prime Game, determine the winner of the game """
 
 
 def is_prime(n):
@@ -25,8 +25,18 @@ def count_primes(n):
 def isWinner(x, nums):
     """ a function to determine the winner of the game """
 
-    if sum([count_primes(n) % 2 for n in nums]) == 0:
-        return None
-    if sum([count_primes(n) % 2 for n in nums]) == len(nums):
+    bob = 0
+    maria = 0
+
+    for n in nums:
+        prime_count = count_primes(n)
+        if prime_count % 2 == 0:
+            bob += 1
+        else:
+            maria += 1
+
+    if bob > maria:
+        return "Bob"
+    if bob < maria:
         return "Maria"
-    return "Ben"
+    return None
