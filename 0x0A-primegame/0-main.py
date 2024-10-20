@@ -3,4 +3,4 @@
 isWinner = __import__('0-prime_game').isWinner
 
 
-print("Winner: {}".format(isWinner(3, [5, 1, 3])))
+print("Winner: {}".format(isWinner(0, [0])))

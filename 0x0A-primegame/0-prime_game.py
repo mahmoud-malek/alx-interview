@@ -21,6 +21,9 @@ def prime_count_up_to_n(sieve, n):
 
 def isWinner(x, nums):
     """ Determines the winner of the game after x rounds """
+
+    if not nums or x < 1:
+        return None
     # Determine the maximum number in nums to optimize sieve size
     max_n = max(nums)
 
